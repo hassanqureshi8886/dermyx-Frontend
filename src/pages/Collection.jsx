@@ -31,7 +31,7 @@ const COLLECTION_SEO = {
 };
 
 const Collection = () => {
-  const { products, search, showSearch } = useContext(ShopContext);
+  const { products, productsStatus, search, showSearch } = useContext(ShopContext);
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -291,7 +291,7 @@ const Collection = () => {
         )}
 
         {/* Products Grid */}
-        {filterProducts.length > 0 ? (
+        {filterProducts.length === 0 && productsStatus !== 'ready' ? null : filterProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6 sm:gap-6 sm:gap-y-8 items-stretch">
             {filterProducts.map((item, index) => (
               <ProductItem

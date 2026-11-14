@@ -1,4 +1,6 @@
-import logo from './logo.png'
+// 480px copy of the brand mark: the original is 4529px wide (2.5 MB) and is
+// only ever shown at 48–64px tall in the navbar.
+import logo from './logo-nav.png'
 import cart_icon from './cart_icon.png'
 import bin_icon from './bin_icon.png'
 import dropdown_icon from './dropdown_icon.png'

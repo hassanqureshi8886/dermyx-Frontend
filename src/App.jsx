@@ -15,6 +15,7 @@ import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
 import Orders from './pages/Orders'
 import Navbar from './components/Navbar'
+import CatalogueNotice from './components/CatalogueNotice'
 import Footer from './components/Footer'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -62,6 +63,7 @@ const App = () => {
       
       {/* Full width Header & Navbar */}
       <Navbar />
+      <CatalogueNotice />
 
       <Routes>
         {/* Home page handles its own padding internally to allow full-width Hero */}

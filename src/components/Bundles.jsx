@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContextValue'
 import Title from './Title'
+import { optimizeImage } from '../utils/seo'
 
 const Bundles = () => {
 
@@ -87,8 +88,10 @@ const Bundles = () => {
                 {/* Full cover image */}
                 <div className="absolute inset-0">
                     <img
-                        src={imgUrl}
+                        src={optimizeImage(imgUrl, 700)}
                         alt={item.name}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                 </div>

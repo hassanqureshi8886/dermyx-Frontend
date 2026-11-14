@@ -12,7 +12,12 @@ const ShopContextProvider = (props) => {
 
     const currency = 'Rs.';
     const delivery_fee = 250;
-    const backendUrl = import.meta.env.VITE_BACKEND_URL
+    // The storefront always calls its own origin: Vite proxies /api in
+    // development and vercel.json rewrites /api to the API deployment in
+    // production. Calling the API domain directly made every request depend on
+    // its CORS allowlist — one stale cached CORS header was enough to leave
+    // mobile shoppers with "Network Error" and an empty catalogue.
+    const backendUrl = import.meta.env.DEV ? (import.meta.env.VITE_BACKEND_URL || '') : ''
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const readStoredCart = () => {
@@ -24,6 +29,7 @@ const ShopContextProvider = (props) => {
     }
     const [cartItems, setCartItems] = useState(readStoredCart);
     const [products, setProducts] = useState([]);
+    const [productsStatus, setProductsStatus] = useState('loading');
     const [token, setToken] = useState('')
     const navigate = useNavigate();
 
@@ -139,14 +145,22 @@ const ShopContextProvider = (props) => {
             const response = await axios.get(backendUrl + '/api/product/list')
             if (response.data.success) {
                 setProducts(response.data.products)
+                setProductsStatus('ready')
             } else {
-                toast.error(response.data.message)
+                setProductsStatus('error')
             }
 
         } catch (error) {
             console.log(error)
-            toast.error(error.message)
+            setProductsStatus('error')
         }
+    }
+
+    // Retrying is a deliberate tap: on a flaky mobile connection an automatic
+    // loop plus a toast per attempt is worse than one visible retry button.
+    const retryProducts = () => {
+        setProductsStatus('loading')
+        getProductsData()
     }
 
     const getUserCart = async ( token ) => {
@@ -162,7 +176,9 @@ const ShopContextProvider = (props) => {
             }
         } catch (error) {
             console.log(error)
-            toast.error(error.message)
+            // Background cart syncs can fail offline. The catalogue notice
+            // already explains connectivity, so a raw "Network Error" toast on
+            // top of it only adds noise; the local cart is untouched.
         }
     }
 
@@ -241,6 +257,7 @@ const ShopContextProvider = (props) => {
 
     const value = {
         products, currency, delivery_fee,
+        productsStatus, retryProducts,
         search, setSearch, showSearch, setShowSearch,
         cartItems, addToCart, setBundleQuantity, setCartItems,
         getCartCount, updateQuantity, isOutOfStock,

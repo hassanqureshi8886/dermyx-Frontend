@@ -30,12 +30,22 @@ const VideoCard = ({ card, onActivity }) => {
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
 
+  // Phones start these clips only on tap. Autoplaying them scrolled through
+  // dozens of megabytes of footage on mobile data for a section most shoppers
+  // scroll past.
+  const canAutoplay = useRef(
+    typeof window !== 'undefined' &&
+    window.matchMedia('(min-width: 640px)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+    !navigator.connection?.saveData
+  );
+
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+        if (canAutoplay.current && entry.isIntersecting && entry.intersectionRatio >= 0.6) {
           el.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
         } else {
           el.pause();
@@ -91,7 +101,7 @@ const VideoCard = ({ card, onActivity }) => {
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="none"
       />
 
       {/* Bottom scrim keeps the badges readable over bright footage */}
@@ -140,6 +150,11 @@ const VideoSection = () => {
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || isPaused) return;
+    // No auto-advance on phones or when the visitor asked for less motion —
+    // each step would pull another multi-megabyte clip.
+    if (window.matchMedia('(max-width: 639px)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (navigator.connection?.saveData) return;
 
     const timer = setInterval(() => {
       const firstCard = container.querySelector('[data-card]');
