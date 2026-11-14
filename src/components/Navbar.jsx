@@ -49,49 +49,6 @@ const Navbar = () => {
         };
     }, [collapsed]);
 
-    // Typewriter effect state
-    const searchKeywords = [
-        "Hairfall Treatment Shampoo",
-        "Skin Brightening Cream",
-        "Purifying Face Cleanser",
-        "Sunblock Sebum Control"
-    ];
-    const [placeholderText, setPlaceholderText] = useState('');
-    const [keywordIndex, setKeywordIndex] = useState(0);
-    const [isDeleting, setIsDeleting] = useState(false);
-
-    useEffect(() => {
-        const currentFullText = searchKeywords[keywordIndex];
-        let timer;
-
-        if (!isDeleting) {
-            // Typing forward
-            if (placeholderText.length < currentFullText.length) {
-                timer = setTimeout(() => {
-                    setPlaceholderText(currentFullText.slice(0, placeholderText.length + 1));
-                }, 90);
-            } else {
-                // Finished typing full keyword, pause before deleting
-                timer = setTimeout(() => {
-                    setIsDeleting(true);
-                }, 1800);
-            }
-        } else {
-            // Deleting backward
-            if (placeholderText.length > 0) {
-                timer = setTimeout(() => {
-                    setPlaceholderText(currentFullText.slice(0, placeholderText.length - 1));
-                }, 40);
-            } else {
-                // Finished deleting, move to next keyword
-                setIsDeleting(false);
-                setKeywordIndex((prev) => (prev + 1) % searchKeywords.length);
-            }
-        }
-
-        return () => clearTimeout(timer);
-    }, [placeholderText, isDeleting, keywordIndex]);
-
     const logout = () => {
         navigate('/login');
         localStorage.removeItem('token');
@@ -102,7 +59,7 @@ const Navbar = () => {
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        const query = searchInput.trim() || placeholderText;
+        const query = searchInput.trim();
         if (query) {
             setSearch(query);
             setShowSearch(true);
@@ -136,15 +93,10 @@ const Navbar = () => {
                     type="text" 
                     value={searchInput}
                     onChange={handleSearchChange}
-                    className='relative z-10 w-full text-sm font-semibold text-center bg-transparent outline-none sm:text-left sm:text-base text-[#2b6cb0]'
+                    placeholder='Search products'
+                    aria-label='Search products'
+                    className='relative z-10 w-full text-sm font-semibold text-center bg-transparent outline-none sm:text-left sm:text-base text-[#2b6cb0] placeholder:text-[#2b6cb0] placeholder:font-semibold'
                 />
-                
-                {!searchInput && (
-                    <span className='absolute left-1/2 -translate-x-1/2 sm:left-0 sm:-translate-x-0 flex items-center overflow-hidden text-sm font-semibold pointer-events-none sm:text-base text-[#2b6cb0] whitespace-nowrap text-ellipsis'>
-                        {placeholderText}
-                        <span className='inline-block w-0.5 h-4 sm:h-5 bg-[#2b6cb0] ml-0.5 animate-pulse'></span>
-                    </span>
-                )}
             </div>
         </form>
     );
@@ -191,13 +143,13 @@ const Navbar = () => {
                 <div className='absolute left-1/2 -translate-x-1/2 flex items-center justify-center'>
                     <Link to='/' className='flex items-center justify-center'>
                         {assets.logo ? (
-                            <img src={assets.logo} className='object-contain h-12 sm:h-16' alt="Skinkit Logo" />
+                            <img src={assets.logo} className='object-contain h-12 sm:h-16' alt="Dermyx Skincare" />
                         ) : (
                             <div className='flex items-center gap-1.5'>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 2L9.5 8.5 3 9.5 8 14l-1.5 6.5L12 17l5.5 3.5L16 14l5-4.5-6.5-1z" />
                                 </svg>
-                                <span className='text-2xl font-bold tracking-widest text-black uppercase prata-regular sm:text-3xl'>Skinkit</span>
+                                <span className='text-2xl font-bold tracking-widest text-black uppercase prata-regular sm:text-3xl'>Dermyx</span>
                             </div>
                         )}
                     </Link>
