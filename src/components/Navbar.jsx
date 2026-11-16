@@ -4,10 +4,10 @@ import { Link, NavLink } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContextValue'
 
 const announcements = [
-    { text: '✦ 11:11 Sale Is Live Now — 20% Off · Shop Now', to: '/collection' },
     { text: '✦ Free Shipping On Orders Over Rs 3000' },
     { text: '✦ Limited Time Offer' },
     { text: '✦ Free Shipping On Orders Over Rs 3000' },
+    { text: '✦ Limited Time Offer' },
 ]
 
 const Navbar = () => {
