@@ -1,8 +1,9 @@
-// Meta (Facebook / Instagram) Pixel. The Pixel ID is public, so it comes from
-// a VITE_ env var; when it is missing or still a placeholder every call below
-// is a no-op and the storefront behaves exactly as before.
+// Meta (Facebook / Instagram) Pixel. The Pixel ID is public, so it is baked in
+// as the default; a numeric VITE_META_PIXEL_ID overrides it.
 
-const PIXEL_ID = String(import.meta.env.VITE_META_PIXEL_ID || '').trim()
+const DEFAULT_PIXEL_ID = '1164200233227385'
+const ENV_PIXEL_ID = String(import.meta.env.VITE_META_PIXEL_ID || '').trim()
+const PIXEL_ID = /^\d{5,}$/.test(ENV_PIXEL_ID) ? ENV_PIXEL_ID : DEFAULT_PIXEL_ID
 const CURRENCY = 'PKR'
 const SCRIPT_SRC = 'https://connect.facebook.net/en_US/fbevents.js'
 const INITIATE_CHECKOUT_KEY = 'dermyx_meta_initiate_checkout'
