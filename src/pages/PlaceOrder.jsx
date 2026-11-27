@@ -6,6 +6,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { bundleUnitPrice } from '../utils/bundlePricing'
 import { shippingFeeFor, FREE_SHIPPING_THRESHOLD } from '../utils/shipping'
+import { trackInitiateCheckoutOnce, trackPurchaseOnce } from '../utils/metaPixel'
 
 const emptyAddress = {
     firstName: '',
@@ -93,6 +94,30 @@ const PlaceOrder = () => {
         setCouponError('');
     }, [subtotal]);
 
+    // InitiateCheckout belongs to the moment checkout opens, not to the order
+    // button. The cart signature makes refreshes and StrictMode re-runs silent,
+    // while a genuinely new cart still counts.
+    useEffect(() => {
+        if (subtotal <= 0) return;
+        const contentIds = [];
+        let numItems = 0;
+        const signatureParts = [];
+        for (const [productId, sizes] of Object.entries(cartItems || {})) {
+            if (!products.some((product) => product._id === productId)) continue;
+            const qty = Object.values(sizes || {}).reduce((sum, value) => sum + (Number(value) > 0 ? Number(value) : 0), 0);
+            if (qty <= 0) continue;
+            contentIds.push(productId);
+            numItems += qty;
+            signatureParts.push(`${productId}:${qty}`);
+        }
+        if (contentIds.length === 0) return;
+        trackInitiateCheckoutOnce(signatureParts.sort().join('|'), {
+            contentIds,
+            value: +(subtotal + shipping).toFixed(2),
+            numItems,
+        });
+    }, [cartItems, products, subtotal, shipping]);
+
     const onSubmitHandler = async (event) => {
         event.preventDefault();
         if (loading) return;
@@ -154,6 +179,15 @@ const PlaceOrder = () => {
             );
             
             if (response.data.success) {
+                // Purchase is tied to the backend-created order, never to the
+                // click itself; the order id also dedupes refreshes and resubmits.
+                const orderId = response.data.orderId;
+                const finalAmount = Number(response.data.amount ?? orderData.amount) || 0;
+                trackPurchaseOnce(orderId, {
+                    value: finalAmount,
+                    contentIds: orderItems.map((item) => item._id),
+                    numItems: orderItems.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0),
+                });
                 sessionStorage.removeItem('placeOrderAddress');
                 setCartItems({});
                 toast.success("Order Placed Successfully!");
@@ -161,10 +195,10 @@ const PlaceOrder = () => {
                     navigate('/orders');
                 } else {
                     setPlacedOrder({
-                        orderId: response.data.orderId,
+                        orderId,
                         email: formData.email,
                         firstName: formData.firstName,
-                        amount: orderData.amount
+                        amount: finalAmount
                     });
                 }
             } else {

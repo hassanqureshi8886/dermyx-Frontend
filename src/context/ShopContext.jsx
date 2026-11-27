@@ -3,7 +3,8 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios'
 import { ShopContext } from './ShopContextValue'
-import { bundleUnitPrice, normalizeCart } from '../utils/bundlePricing'
+import { bundleTotal, bundleUnitPrice, normalizeCart } from '../utils/bundlePricing'
+import { trackAddToCart } from '../utils/metaPixel'
 
 // Ensure requests specify JSON acceptance to prevent 406 Not Acceptable responses
 axios.defaults.headers.common['Accept'] = 'application/json';
@@ -52,6 +53,9 @@ const ShopContextProvider = (props) => {
         cartData[itemId] = { ...(cartData[itemId] || {}), [size]: nextQty };
         setCartItems(cartData);
 
+        const addedProduct = products.find((product) => product._id === itemId);
+        trackAddToCart(addedProduct, 1, addedProduct?.price);
+
         if (token) {
             try {
                 await axios.post(backendUrl + '/api/cart/add', { itemId, size, quantity: nextQty }, { headers: { token } })
@@ -74,6 +78,9 @@ const ShopContextProvider = (props) => {
 
         cartData[itemId] = { [size]: qty };
         setCartItems(cartData);
+
+        const addedProduct = products.find((product) => product._id === itemId);
+        trackAddToCart(addedProduct, qty, addedProduct ? bundleTotal(addedProduct.price, qty) : 0);
 
         if (token) {
             try {

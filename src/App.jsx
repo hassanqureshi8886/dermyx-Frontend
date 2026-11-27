@@ -17,6 +17,7 @@ import Orders from './pages/Orders'
 import Navbar from './components/Navbar'
 import CatalogueNotice from './components/CatalogueNotice'
 import Footer from './components/Footer'
+import MetaPixelTracker from './components/MetaPixelTracker'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Seo from './components/Seo'
@@ -59,6 +60,7 @@ const App = () => {
   return (
     <div className='w-full min-h-screen bg-white'>
       <ToastContainer />
+      <MetaPixelTracker />
       {staticSeo && <Seo path={pathname} {...staticSeo} />}
       
       {/* Full width Header & Navbar */}

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContextValue'
 import RelatedProducts from '../components/RelatedProducts'
@@ -6,6 +6,7 @@ import ProductReviews from '../components/ProductReviews'
 import Seo from '../components/Seo'
 import { MdCheckCircle, MdExpandMore } from 'react-icons/md'
 import { getTiers } from '../utils/bundlePricing'
+import { trackViewContent } from '../utils/metaPixel'
 import { SITE_URL, optimizeImage, pageUrl, stripText } from '../utils/seo'
 
 const Product = () => {
@@ -16,6 +17,7 @@ const Product = () => {
   const [imgIndex, setImgIndex] = useState(0)
   const [selectedTier, setSelectedTier] = useState(1)
   const [showIngredients, setShowIngredients] = useState(false)
+  const trackedProductId = useRef('')
 
   // Auto-cycle images every 5 seconds
   useEffect(() => {
@@ -33,6 +35,13 @@ const Product = () => {
       }
     })
   }, [productId, products])
+
+  // StrictMode runs effects twice, so the id itself guards the duplicate.
+  useEffect(() => {
+    if (!productData?._id || trackedProductId.current === productData._id) return
+    trackedProductId.current = productData._id
+    trackViewContent(productData)
+  }, [productData])
 
   if (!productData) return <div className='opacity-0'></div>
 
